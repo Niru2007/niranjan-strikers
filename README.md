@@ -71,9 +71,6 @@ Real-world rental workflow
 Fully functional demo-ready system
 
 Future Scope
-User authentication system
-
-GUI or web-based interface
 
 Late return fee calculation
 
