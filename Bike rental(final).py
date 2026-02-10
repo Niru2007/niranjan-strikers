@@ -79,12 +79,31 @@ def view_rentals():
 
 # ---------------- USER FUNCTIONS ----------------
 def user_menu():
+    while True:
+        print("\n--- USER MENU ---")
+        print("1. Rent Item")
+        print("2. Return Item")
+        print("3. Back")
+
+        choice = input("Choose: ")
+
+        if choice == "1":
+            rent_item()
+        elif choice == "2":
+            return_item()
+        elif choice == "3":
+            break
+        else:
+            print("Invalid choice")
+
+
+def rent_item():
     print("\n--- AVAILABLE ITEMS ---")
     items = []
 
     with open(ITEMS_FILE, "r") as f:
         reader = csv.reader(f)
-        header = next(reader)
+        next(reader)
         for row in reader:
             if row[4] == "Yes":
                 items.append(row)
@@ -102,8 +121,34 @@ def user_menu():
         if item[0] == item_id:
             total = days * int(item[3])
             save_rental(user, item[1], days, total)
-            mark_unavailable(item_id)
+            mark_availability(item_id, "No")
             print(f"✅ Rented successfully. Total: ₹{total}")
+            return
+
+    print("❌ Item not found")
+
+def return_item():
+    print("\n--- RENTED ITEMS ---")
+    rented_items = []
+
+    with open(ITEMS_FILE, "r") as f:
+        reader = csv.reader(f)
+        next(reader)
+        for row in reader:
+            if row[4] == "No":
+                rented_items.append(row)
+                print(f"{row[0]}. {row[1]}")
+
+    if not rented_items:
+        print("No rented items to return")
+        return
+
+    item_id = input("Enter item ID to return: ")
+
+    for item in rented_items:
+        if item[0] == item_id:
+            mark_availability(item_id, "Yes")
+            print(f"✅ {item[1]} returned successfully")
             return
 
     print("❌ Item not found")
@@ -129,6 +174,21 @@ def mark_unavailable(item_id):
     for row in rows:
         if row and row[0] == item_id:
             row[4] = "No"
+
+    with open(ITEMS_FILE, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerows(rows)
+        
+def mark_availability(item_id, status):
+    rows = []
+
+    with open(ITEMS_FILE, "r") as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+
+    for row in rows:
+        if row and row[0] == item_id:
+            row[4] = status
 
     with open(ITEMS_FILE, "w", newline="") as f:
         writer = csv.writer(f)
